@@ -3,7 +3,16 @@ const User = require('../models/User');
 
 module.exports = async (req, res, next) => {
   try {
-    const token = req.header('Authorization').replace('Bearer ', '');
+    const authHeader = req.header('Authorization');
+    if (!authHeader) {
+      return res.status(401).json({ message: 'No authorization header' });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided' });
+    }
+
     const decoded = jwt.verify(token, 'your_jwt_secret'); // Replace with environment variable in production
     
     // Get the user from the database to ensure we have the latest role
@@ -20,6 +29,11 @@ module.exports = async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Auth middleware error:', err);
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token' });
+    } else if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Token expired' });
+    }
     res.status(401).json({ message: 'Authentication required' });
   }
 }; 

@@ -109,12 +109,14 @@ const Orders = () => {
                 </TableHead>
                 <TableBody>
                   {order.items.map((item) => (
-                    <TableRow key={item._id}>
-                      <TableCell>{item.product.name}</TableCell>
-                      <TableCell align="right">{item.quantity}</TableCell>
-                      <TableCell align="right">₹{item.price}</TableCell>
-                      <TableCell align="right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
-                    </TableRow>
+                    item.product ? (
+                      <TableRow key={item._id}>
+                        <TableCell>{item.product.name}</TableCell>
+                        <TableCell align="right">{item.quantity}</TableCell>
+                        <TableCell align="right">₹{item.price}</TableCell>
+                        <TableCell align="right">₹{(item.price * item.quantity).toFixed(2)}</TableCell>
+                      </TableRow>
+                    ) : null
                   ))}
                   <TableRow>
                     <TableCell colSpan={3} align="right">

@@ -10,7 +10,7 @@ const cartItemSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Quantity is required'],
     min: [1, 'Quantity must be at least 1'],
-    default: 1
+    default: 0
   }
 }, { _id: true });
 
@@ -42,6 +42,9 @@ cartSchema.methods.calculateTotal = async function() {
 cartSchema.methods.validateStock = async function() {
   await this.populate('items.product');
   for (const item of this.items) {
+    if (!item.product) {
+      throw new Error('Product not found');
+    }
     if (item.quantity > item.product.stock) {
       throw new Error(`Not enough stock for ${item.product.name}`);
     }
@@ -50,13 +53,19 @@ cartSchema.methods.validateStock = async function() {
 };
 
 // Pre-save middleware to validate stock
-cartSchema.pre('save', async function(next) {
-  try {
-    await this.validateStock();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+// cartSchema.pre('save', async function(next) {
+//   try {
+//     console.log('Cart pre-save middleware called');
+//     // Only validate stock if items exist
+//     if (this.items && this.items.length > 0) {
+//       console.log('Validating stock for', this.items.length, 'items');
+//       await this.validateStock();
+//     }
+//     next();
+//   } catch (error) {
+//     console.error('Cart pre-save middleware error:', error);
+//     next(error);
+//   }
+// });
 
 module.exports = mongoose.model('Cart', cartSchema); 

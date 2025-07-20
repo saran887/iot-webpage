@@ -8,8 +8,12 @@ const Product = require('../models/Product');
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
-    const query = category ? { category } : {};
-    const products = await Product.find(query);
+    if (category) {
+      const products = await Product.find({ category });
+      return res.json(products);
+    }
+    // Return 10 random products if no category is specified
+    const products = await Product.aggregate([{ $sample: { size: 10 } }]);
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });

@@ -33,6 +33,10 @@ const Login = () => {
       const response = await axios.post('http://localhost:5000/api/auth/login', formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', response.data.user.role);
+      localStorage.setItem('user', JSON.stringify({
+        name: response.data.user.name,
+        email: response.data.user.email
+      }));
       
       if (response.data.user.role === 'admin') {
         navigate('/admin');
