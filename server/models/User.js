@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
   resetOtpExpires: {
     type: Date
   },
+  mobile: {
+    type: String,
+    required: true,
+    match: [/^[6-9]\d{9}$/, 'Mobile number must be 10 digits and start with 6, 7, 8, or 9']
+  },
   address: {
     street: { type: String },
     city: { type: String },

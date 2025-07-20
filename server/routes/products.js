@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const admin = require('../middleware/admin');
 const Product = require('../models/Product');
+const State = require('../models/State');
 
 // Get all products
 router.get('/', async (req, res) => {

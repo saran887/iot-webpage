@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignore SMS API key file
+.sms_api_key
+server/sms_api_key.txt

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Container,
@@ -9,6 +9,10 @@ import {
   Link,
   Box,
   Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl
 } from '@mui/material';
 import axios from 'axios';
 
@@ -18,35 +22,61 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    mobile: '',
+    address: {
+      state: '',
+      city: '',
+      street: '',
+      zipCode: '',
+      country: 'India'
+    }
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+
+  useEffect(() => {
+    // Fetch all states from backend
+    axios.get('http://localhost:5000/api/locations/states')
+      .then(res => setStates(res.data))
+      .catch(() => setStates([]));
+  }, []);
+
+  useEffect(() => {
+    if (formData.address.state) {
+      axios.get(`http://localhost:5000/api/locations/districts?state=${encodeURIComponent(formData.address.state)}`)
+        .then(res => setDistricts(res.data))
+        .catch(() => setDistricts([]));
+    } else {
+      setDistricts([]);
+    }
+  }, [formData.address.state]);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    if (e.target.name.startsWith('address.')) {
+      setFormData({
+        ...formData,
+        address: {
+          ...formData.address,
+          [e.target.name.split('.')[1]]: e.target.value
+        }
+      });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
+    setError('');
+    setSuccess('');
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('role', response.data.user.role);
-      navigate('/');
+      await axios.post('http://localhost:5000/api/auth/register', formData);
+      setSuccess('Registration successful! Please login.');
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'An error occurred');
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -60,6 +90,11 @@ const Register = () => {
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
           </Alert>
         )}
 
@@ -95,10 +130,65 @@ const Register = () => {
           />
           <TextField
             fullWidth
-            label="Confirm Password"
-            name="confirmPassword"
-            type="password"
-            value={formData.confirmPassword}
+            label="Mobile Number"
+            name="mobile"
+            value={formData.mobile}
+            onChange={handleChange}
+            margin="normal"
+            required
+            inputProps={{ maxLength: 10 }}
+            helperText="Enter 10 digit mobile number"
+          />
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel>State</InputLabel>
+            <Select
+              name="address.state"
+              value={formData.address.state}
+              label="State"
+              onChange={handleChange}
+            >
+              {states.map((state) => (
+                <MenuItem key={state} value={state}>{state}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth margin="normal" required>
+            <InputLabel>City/District</InputLabel>
+            <Select
+              name="address.city"
+              value={formData.address.city}
+              label="City/District"
+              onChange={handleChange}
+              disabled={!formData.address.state}
+            >
+              {districts.map((district) => (
+                <MenuItem key={district} value={district}>{district}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            fullWidth
+            label="Street"
+            name="address.street"
+            value={formData.address.street}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="ZIP Code"
+            name="address.zipCode"
+            value={formData.address.zipCode}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Country"
+            name="address.country"
+            value={formData.address.country}
             onChange={handleChange}
             margin="normal"
             required
