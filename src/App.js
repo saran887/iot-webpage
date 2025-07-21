@@ -17,6 +17,7 @@ import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 import Profile from './pages/Profile';
 import HomeRedirect from './pages/HomeRedirect';
+import ConfirmOtp from './pages/ConfirmOtp';
 
 const theme = createTheme({
   palette: {
@@ -44,6 +45,7 @@ function App() {
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
           <Route path="/orders" element={<PrivateRoute><Orders /></PrivateRoute>} />
+          <Route path="/confirm-otp" element={<ConfirmOtp />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />

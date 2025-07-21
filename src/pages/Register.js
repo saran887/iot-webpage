@@ -22,6 +22,7 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     mobile: '',
     address: {
       state: '',
@@ -71,10 +72,14 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
     try {
       await axios.post('http://localhost:5000/api/auth/register', formData);
-      setSuccess('Registration successful! Please login.');
-      setTimeout(() => navigate('/login'), 1500);
+      // Redirect to confirm OTP page with email
+      navigate('/confirm-otp', { state: { email: formData.email } });
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     }
@@ -124,6 +129,16 @@ const Register = () => {
             name="password"
             type="password"
             value={formData.password}
+            onChange={handleChange}
+            margin="normal"
+            required
+          />
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            name="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
             onChange={handleChange}
             margin="normal"
             required
